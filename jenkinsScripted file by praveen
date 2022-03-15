@@ -1,0 +1,25 @@
+node
+{
+  def mavenHome = tool name: "Maven 3.8.2"
+  
+ stage('pull the image'){
+    git branch: 'development', credentialsId: '5744c651-576a-421f-a707-645559c72bd0', url: 'https://github.com/Praveen-Software-Solutions/maven-web-application.git' 
+   } 
+ stage('build'){
+     sh "${mavenHome}/bin/mvn clean package"
+ }
+ stage ('execut sonar report'){
+     sh "${mavenHome}/bin/mvn clean sonar:sonar"
+ }
+ stage ('upload artifact into nexus'){
+    sh "${mavenHome}/bin/mvn clean deploy"
+ }
+ stage ('deploy the app into tomcat'){
+     sshagent(['35297790-6213-4adf-a92d-ac7f4c737918']) {
+     sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.108.219.129:/opt/apache-tomcat-9.0.59/webapps"
+ }
+ }
+
+}
+ 
+ 
